@@ -20,7 +20,7 @@ class line {
     }
 
     lenght () {
-        return len(this.x1, this.x2, this.y1, this.y2);
+        return len(this.x1, this.y1, this.x2, this.y2);
     }
 
     equals(other){
@@ -114,6 +114,13 @@ class cell {
         return Math.sqrt(Math.min(this.up.lenght(), this.down.lenght(), this.left.lenght(), this.right.lenght()));
     }
 
+    width() {
+        return this.up.lenght();
+    }
+    height() {
+        return this.right.lenght();
+    }
+
     addWallsToArray(array) {
         add_if(array, this.up);
         add_if(array, this.down);
@@ -130,45 +137,61 @@ function rec_div_met(walls_to_fill, cell_to_devide, min_size) {
         const down = new line(0, height, width, height);
         const left = new line(0, 0, 0, height);
         const right = new line(width, 0, width, height);
-        let first_cell = new cell(up, down, left, right);
+        let first_cell = new cell(up, down, right, left);
         first_cell.addWallsToArray(walls_to_fill);
         rec_div_met(walls_to_fill, first_cell, min_size);
     } else {
         const size = cell_to_devide.size();
-        if(size <= min_size){
+        if(size <= min_size + 10){
             return;
         }
         const up = cell_to_devide.up;
         const down = cell_to_devide.down;
         const left = cell_to_devide.left;
         const right = cell_to_devide.right;
-        const val = Math.floor((Math.random() * size) / min_size) * min_size;
+        let val = Math.floor((Math.random() * size) / min_size) * min_size;
+        if(val == 0){
+            val = min_size / 2;
+        }
         let new_cell;
+        let other_cell;
         if(Math.random() > 0.5){
             const new_right = new line(right.x1, right.y1, right.x2, right.y2 - val);
             const new_left = new line(left.x1, left.y1, left.x2, left.y2 - val);
             const new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
             new_cell = new cell(up, new_down, new_right, new_left);
+            const other_right = new line(right.x1, right.y2 - val, right.x2, right.y2);
+            const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
+            other_cell = new cell(new_down, down, other_right, other_left);
+            walls_to_fill.push(new_down);
         } else {
             const new_up = new line(up.x1, up.y1, up.x2 - val, up.y2);
             const new_down = new line(down.x1, down.y1, down.x2 - val, down.y2);
             const new_right = new line(right.x1 - val, right.y1, right.x2 - val, right.y2);
             new_cell = new cell(new_up, new_down, new_right, left);
+            const other_up = new line(up.x2 - val, up.y1, up.x2, up.y2);
+            const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
+            other_cell = new cell(other_up, other_down, right, new_right);
+            walls_to_fill.push(new_right);
         }
-        new_cell.addWallsToArray(walls_to_fill);
+        draw_lines(walls_to_fill, ctx);
         rec_div_met(walls_to_fill, new_cell, min_size);
+        rec_div_met(walls_to_fill, other_cell, min_size);
     }
 }
 
 function draw_lines(lines, can) {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     lines.forEach( element => {
         element.draw(can);
     });
 }
 
-
-const canvas = document.querySelector('canvas');
+var canvas = document.querySelector('canvas'); //temporary
 const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 const thick = ctx.lineWidth;
 const wall = new line(100, 100, 200, 200);
 const height = window.innerHeight;
@@ -189,8 +212,7 @@ if(random){
 draw_lines(walls, ctx);
 
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+
 
 document.body.addEventListener('mousemove', function (event) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);

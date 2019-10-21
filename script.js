@@ -115,10 +115,10 @@ class cell {
     }
 
     width() {
-        return this.up.lenght();
+        return Math.sqrt(this.up.lenght());
     }
     height() {
-        return this.right.lenght();
+        return Math.sqrt(this.right.lenght());
     }
 
     addWallsToArray(array) {
@@ -141,21 +141,22 @@ function rec_div_met(walls_to_fill, cell_to_devide, min_size) {
         first_cell.addWallsToArray(walls_to_fill);
         rec_div_met(walls_to_fill, first_cell, min_size);
     } else {
-        const size = cell_to_devide.size();
-        if(size <= min_size + 10){
-            return;
-        }
+        
         const up = cell_to_devide.up;
         const down = cell_to_devide.down;
         const left = cell_to_devide.left;
         const right = cell_to_devide.right;
-        let val = Math.floor((Math.random() * size) / min_size) * min_size;
-        if(val == 0){
-            val = min_size / 2;
-        }
         let new_cell;
         let other_cell;
         if(Math.random() > 0.5){
+            const size = cell_to_devide.height();
+            if(size <= min_size + 10){
+                return;
+            }
+            let val = Math.floor((Math.random() * size) / min_size) * min_size;
+            if(val == 0){
+                val = min_size / 2;
+            }
             const new_right = new line(right.x1, right.y1, right.x2, right.y2 - val);
             const new_left = new line(left.x1, left.y1, left.x2, left.y2 - val);
             const new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
@@ -165,6 +166,14 @@ function rec_div_met(walls_to_fill, cell_to_devide, min_size) {
             other_cell = new cell(new_down, down, other_right, other_left);
             walls_to_fill.push(new_down);
         } else {
+            const size = cell_to_devide.width();
+            if(size <= min_size + 10){
+                return;
+            }
+            let val = Math.floor((Math.random() * size) / min_size) * min_size;
+            if(val == 0){
+                val = min_size / 2;
+            }
             const new_up = new line(up.x1, up.y1, up.x2 - val, up.y2);
             const new_down = new line(down.x1, down.y1, down.x2 - val, down.y2);
             const new_right = new line(right.x1 - val, right.y1, right.x2 - val, right.y2);

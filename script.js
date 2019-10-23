@@ -129,7 +129,105 @@ class cell {
     }
 }
 
-function rec_div_met(walls_to_fill, cell_to_devide, min_size) {
+
+function random_form_to(start, end) {
+    return Math.random() * (end - start) + start;
+}
+
+function test_doors_col(random_number, doors, x1, x2, y, size, is_vertical) {
+    if(is_vertical){
+        for(let i = 0; i < doors.length; i++){
+            if (random_number >= doors[i].x1 && random_number <= doors[i].x2 && doors[i].y1 < y + 5 && doors[i].y1 > y - 5) {
+                return (random_number + (random_form_to(size + 1, x2 - doors[i] - 1))) % (x2 + 1);
+            }
+        }
+    } else {
+        for(let i = 0; i < doors.length; i++){
+            if (random_number >= doors[i].y1 && random_number <= doors[i].y2 && doors[i].x1 < y + 5 && doors[i].x1 > y - 5) {
+                return (random_number + (random_form_to(size + 1, x2 - doors[i] - 1))) % (x2 + 1);
+            }
+        }
+    }
+    
+    return random_number;
+}
+
+
+function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_size, size, doors){
+    const up = cell_to_devide.up;
+    const down = cell_to_devide.down;
+    const left = cell_to_devide.left;
+    const right = cell_to_devide.right;
+    if(size <= min_size){
+        return;
+    }
+    let val = Math.floor((Math.random() * size) / min_size) * min_size;
+    if (val == 0) {
+        val = min_size / 2;
+    }
+    const new_right = new line(right.x1, right.y1, right.x2, right.y2 - val);
+    const new_left = new line(left.x1, left.y1, left.x2, left.y2 - val);
+    const new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
+    const new_cell = new cell(up, new_down, new_right, new_left);
+    const other_right = new line(right.x1, right.y2 - val, right.x2, right.y2);
+    const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
+    const other_cell = new cell(new_down, down, other_right, other_left);
+    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_down.lenght()) - min_size)) / min_size) * min_size;
+    doore_pos = test_doors_col(doore_pos, doors, new_down.x1, new_down.x2, new_down.y1,  min_size, false);
+    if(doore_pos >= Math.sqrt(new_down.lenght())) {
+        return;
+    }
+    const l_part = new line(new_down.x1, new_down.y1, new_down.x1 + doore_pos, new_down.y2);
+    if(l_part.x1 > l_part.x2) return;
+    if(l_part.y1 > l_part.y2) return;
+    const p_part = new line(l_part.x2 + min_size, l_part.y1, new_down.x2, new_down.y2);
+    if(p_part.x1 > p_part.x2) return;
+    if(p_part.y1 > p_part.y2) return;
+    doors.push(new line(l_part.x2, l_part.y2, p_part.x1, p_part.x2));
+    walls_to_fill.push(l_part);
+    walls_to_fill.push(p_part);
+    draw_lines(walls_to_fill, ctx);
+    rec_div_met(walls_to_fill, new_cell, min_size, doors);
+    rec_div_met(walls_to_fill, other_cell, min_size, doors);
+}
+
+function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_size, size, doors){
+    const up = cell_to_devide.up;
+    const down = cell_to_devide.down;
+    const left = cell_to_devide.left;
+    const right = cell_to_devide.right;
+    if(size <= min_size){
+        return;
+    }
+    let val = Math.floor((Math.random() * size) / min_size) * min_size;
+    if(val == 0){
+        val = min_size / 2;
+    }
+    const new_up = new line(up.x1, up.y1, up.x2 - val, up.y2);
+    const new_down = new line(down.x1, down.y1, down.x2 - val, down.y2);
+    const new_right = new line(right.x1 - val, right.y1, right.x2 - val, right.y2);
+    const new_cell = new cell(new_up, new_down, new_right, left);
+    const other_up = new line(up.x2 - val, up.y1, up.x2, up.y2);
+    const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
+    const other_cell = new cell(other_up, other_down, right, new_right);
+    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_right.lenght()) - min_size)) / min_size) * min_size;
+    doore_pos = test_doors_col(doore_pos, doors, new_right.y1, new_right.y2, new_right.x1, min_size, true);
+    if (doore_pos >= Math.sqrt(new_down.lenght())) return;
+    const t_part = new line(new_right.x1, new_right.y1, new_right.x2, new_right.y1 + doore_pos);
+    if (t_part.x1 > t_part.x2) return;
+    if (t_part.y1 > t_part.y2) return;
+    const d_part = new line(t_part.x1, t_part.y2 + min_size, new_right.x2, new_right.y2);
+    if (d_part.x1 > d_part.x2) return;
+    if (d_part.y1 > d_part.y2) return;
+    doors.push(new line(t_part.x2, t_part.y2, d_part.x1, d_part.x2));
+    walls_to_fill.push(t_part);
+    walls_to_fill.push(d_part);
+    draw_lines(walls_to_fill, ctx);
+    rec_div_met(walls_to_fill, new_cell, min_size, doors);
+    rec_div_met(walls_to_fill, other_cell, min_size, doors);
+}
+
+function rec_div_met(walls_to_fill, cell_to_devide, min_size, doors) {
     if(walls_to_fill.length == 0){
         const height = window.innerHeight;
         const width =  window.innerWidth;
@@ -139,56 +237,33 @@ function rec_div_met(walls_to_fill, cell_to_devide, min_size) {
         const right = new line(width, 0, width, height);
         let first_cell = new cell(up, down, right, left);
         first_cell.addWallsToArray(walls_to_fill);
-        rec_div_met(walls_to_fill, first_cell, min_size);
+        rec_div_met(walls_to_fill, first_cell, min_size, doors);
     } else {
-        
-        const up = cell_to_devide.up;
-        const down = cell_to_devide.down;
-        const left = cell_to_devide.left;
-        const right = cell_to_devide.right;
-        let new_cell;
-        let other_cell;
-        if(Math.random() > 0.5){
-            const size = cell_to_devide.height();
-            if(size <= min_size + 10){
+        let size = cell_to_devide.height();
+        if (Math.random() > 0.5) {
+            if (size <= min_size) {
+                size = cell_to_devide.width();
+                if (size <= min_size){
+                    return;
+                }
+                add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_size, size, doors);
                 return;
             }
-            let val = Math.floor((Math.random() * size) / min_size) * min_size;
-            if(val == 0){
-                val = min_size / 2;
-            }
-            const new_right = new line(right.x1, right.y1, right.x2, right.y2 - val);
-            const new_left = new line(left.x1, left.y1, left.x2, left.y2 - val);
-            const new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
-            new_cell = new cell(up, new_down, new_right, new_left);
-            const other_right = new line(right.x1, right.y2 - val, right.x2, right.y2);
-            const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
-            other_cell = new cell(new_down, down, other_right, other_left);
-            walls_to_fill.push(new_down);
+            add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_size, size, doors);
         } else {
-            const size = cell_to_devide.width();
-            if(size <= min_size + 10){
+            size = cell_to_devide.width();
+            if(size <= min_size){
+                size = cell_to_devide.height();
+                if(size <= min_size){
+                    return;
+                }
+                add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_size, size, doors);
                 return;
             }
-            let val = Math.floor((Math.random() * size) / min_size) * min_size;
-            if(val == 0){
-                val = min_size / 2;
-            }
-            const new_up = new line(up.x1, up.y1, up.x2 - val, up.y2);
-            const new_down = new line(down.x1, down.y1, down.x2 - val, down.y2);
-            const new_right = new line(right.x1 - val, right.y1, right.x2 - val, right.y2);
-            new_cell = new cell(new_up, new_down, new_right, left);
-            const other_up = new line(up.x2 - val, up.y1, up.x2, up.y2);
-            const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
-            other_cell = new cell(other_up, other_down, right, new_right);
-            walls_to_fill.push(new_right);
+            add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_size, size, doors);
         }
-        draw_lines(walls_to_fill, ctx);
-        rec_div_met(walls_to_fill, new_cell, min_size);
-        rec_div_met(walls_to_fill, other_cell, min_size);
     }
 }
-
 function draw_lines(lines, can) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     lines.forEach( element => {
@@ -214,24 +289,21 @@ if(random){
         }
     }
 } else {
-    rec_div_met(walls, window, 100);
+    let doors = [];
+    rec_div_met(walls, window, 50, doors);
 }
 
-
 draw_lines(walls, ctx);
-
-
-
 
 document.body.addEventListener('mousemove', function (event) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     const x = event.clientX, y = event.clientY;
     const center = new Point(x, y);
-    ctx.lineWidth = 10;
+    //ctx.lineWidth = 10;
     draw_lines(walls, ctx);
     ctx.lineWidth = thick;
-    const r = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
-    for (var i = 0; i < 2 * Math.PI; i += (Math.PI / 360)) {
+    const r = 100; Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
+    for (var i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
         const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
         obj.intersection(walls);
         obj.draw(ctx);

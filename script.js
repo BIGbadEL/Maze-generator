@@ -134,16 +134,22 @@ function random_form_to(start, end) {
     return Math.random() * (end - start) + start;
 }
 
-function test_doors_col(random_number, doors, x1, x2, y, size, is_vertical) {
+function test_doors_col(random_number, doors, x1, x2, y1, y2, size, is_vertical) {
     if(is_vertical){
         for(let i = 0; i < doors.length; i++){
-            if (random_number >= doors[i].x1 && random_number <= doors[i].x2 && doors[i].y1 < y + 5 && doors[i].y1 > y - 5) {
+            if (random_number >= doors[i].x1 && random_number <= doors[i].x2 && doors[i].y1 < y1 + 5 && doors[i].y1 > y1 - 5) {
+                return (random_number + (random_form_to(size + 1, x2 - doors[i] - 1))) % (x2 + 1);
+            }
+            if (random_number >= doors[i].x1 && random_number <= doors[i].x2 && doors[i].y2 < y2 + 5 && doors[i].y2 > y2 - 5) {
                 return (random_number + (random_form_to(size + 1, x2 - doors[i] - 1))) % (x2 + 1);
             }
         }
     } else {
         for(let i = 0; i < doors.length; i++){
-            if (random_number >= doors[i].y1 && random_number <= doors[i].y2 && doors[i].x1 < y + 5 && doors[i].x1 > y - 5) {
+            if (random_number >= doors[i].y1 && random_number <= doors[i].y2 && doors[i].x1 < y1 + 5 && doors[i].x1 > y1 - 5) {
+                return (random_number + (random_form_to(size + 1, x2 - doors[i] - 1))) % (x2 + 1);
+            }
+            if (random_number >= doors[i].y1 && random_number <= doors[i].y2 && doors[i].x2 < y2 + 5 && doors[i].x2 > y2 - 5) {
                 return (random_number + (random_form_to(size + 1, x2 - doors[i] - 1))) % (x2 + 1);
             }
         }
@@ -173,16 +179,18 @@ function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_s
     const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
     const other_cell = new cell(new_down, down, other_right, other_left);
     let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_down.lenght()) - min_size)) / min_size) * min_size;
-    doore_pos = test_doors_col(doore_pos, doors, new_down.x1, new_down.x2, new_down.y1,  min_size, false);
+    doore_pos = test_doors_col(doore_pos, doors, new_down.x1, new_down.x2, new_down.y1, new_down.y2,  min_size, false);
     if(doore_pos >= Math.sqrt(new_down.lenght())) {
         return;
     }
     const l_part = new line(new_down.x1, new_down.y1, new_down.x1 + doore_pos, new_down.y2);
-    if(l_part.x1 > l_part.x2) return;
-    if(l_part.y1 > l_part.y2) return;
+    if(l_part.x1 > l_part.x2) {
+        return;
+    }
     const p_part = new line(l_part.x2 + min_size, l_part.y1, new_down.x2, new_down.y2);
-    if(p_part.x1 > p_part.x2) return;
-    if(p_part.y1 > p_part.y2) return;
+    if(p_part.x1 > p_part.x2) {
+        return;
+    }
     doors.push(new line(l_part.x2, l_part.y2, p_part.x1, p_part.x2));
     walls_to_fill.push(l_part);
     walls_to_fill.push(p_part);
@@ -211,14 +219,18 @@ function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_siz
     const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
     const other_cell = new cell(other_up, other_down, right, new_right);
     let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_right.lenght()) - min_size)) / min_size) * min_size;
-    doore_pos = test_doors_col(doore_pos, doors, new_right.y1, new_right.y2, new_right.x1, min_size, true);
-    if (doore_pos >= Math.sqrt(new_down.lenght())) return;
+    doore_pos = test_doors_col(doore_pos, doors, new_right.y1, new_right.y2, new_right.x1, new_right.x2, min_size, true);
+    if (doore_pos >= Math.sqrt(new_right.lenght())) {
+        return;
+    }
     const t_part = new line(new_right.x1, new_right.y1, new_right.x2, new_right.y1 + doore_pos);
-    if (t_part.x1 > t_part.x2) return;
-    if (t_part.y1 > t_part.y2) return;
+    if (t_part.y1 > t_part.y2) {
+        return;
+    }
     const d_part = new line(t_part.x1, t_part.y2 + min_size, new_right.x2, new_right.y2);
-    if (d_part.x1 > d_part.x2) return;
-    if (d_part.y1 > d_part.y2) return;
+    if (d_part.y1 > d_part.y2) {
+        return;
+    }
     doors.push(new line(t_part.x2, t_part.y2, d_part.x1, d_part.x2));
     walls_to_fill.push(t_part);
     walls_to_fill.push(d_part);
@@ -240,7 +252,7 @@ function rec_div_met(walls_to_fill, cell_to_devide, min_size, doors) {
         rec_div_met(walls_to_fill, first_cell, min_size, doors);
     } else {
         let size = cell_to_devide.height();
-        if (Math.random() > 0.5) {
+        if (Math.random() > 0.6) {
             if (size <= min_size) {
                 size = cell_to_devide.width();
                 if (size <= min_size){

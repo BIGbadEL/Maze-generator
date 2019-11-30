@@ -22,11 +22,11 @@ class line {
 
     debugBrake() {
         if (isNaN(this.x1) || isNaN(this.x2) || isNaN(this.y1) || isNaN(this.y2)) {
-            return this.lenght();
+            return this.length();
         }
     }
 
-    lenght() {
+    length() {
         return len(this.x1, this.y1, this.x2, this.y2);
     }
 
@@ -87,7 +87,6 @@ class line {
                 }
             }
         }
-        //this.flag = !(last.x == this.x2 && last.y == this.y2);
         this.x2 = last.x;
         this.y2 = last.y;
     }
@@ -122,11 +121,11 @@ class cell {
     }
 
     width() {
-        return Math.sqrt(this.up.lenght());
+        return Math.sqrt(this.up.length());
     }
 
     height() {
-        return Math.sqrt(this.right.lenght());
+        return Math.sqrt(this.right.length());
     }
 
     addWallsToArray(array) {
@@ -151,10 +150,7 @@ function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_s
     if (size <= min_size) {
         return;
     }
-    let val = Math.floor(Math.sqrt(down.lenght()) / 2 / min_size) * min_size;//Math.floor(random_form_to(min_size, Math.sqrt(down.lenght()) - min_size) / min_size) * min_size;
-    if (val === 0) {
-        val = min_size;
-    }
+    const val = Math.floor(random_form_to(min_size, Math.sqrt(right.length()) - min_size) / min_size) * min_size;//Math.floor(random_form_to(min_size, Math.sqrt(down.lenght()) - min_size) / min_size) * min_size;
     const new_right = new line(right.x1, right.y1, right.x2, right.y2 - val);
     const new_left = new line(left.x1, left.y1, left.x2, left.y2 - val);
     let new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
@@ -162,15 +158,8 @@ function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_s
     const other_right = new line(right.x1, right.y2 - val, right.x2, right.y2);
     const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
     const other_cell = new cell(new_down, down, other_right, other_left);
-    //if(new_down.y2 < min_size) return;
-    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_down.lenght()) - min_size)) / min_size) * min_size;
-    //doore_pos = Math.floor(test_doors_col(doore_pos, doors, new_down.x1, new_down.x2, new_down.y1, new_down.y2,  min_size, false) / min_size) * min_size;
-    //val = Math.floor(test_doors_col(val, doors, new_down.x1, new_down.x2, new_down.y1, new_down.y2, min_size, false) / min_size) * min_size;
-    const temp = val;
-    if (temp !== val) {
-        new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
-    }
-    if (doore_pos >= Math.sqrt(new_down.lenght())) {
+    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_down.length()) - min_size)) / min_size) * min_size;
+    if (doore_pos >= Math.sqrt(new_down.length())) {
         return;
     }
     const l_part = new line(new_down.x1, new_down.y1, new_down.x1 + doore_pos, new_down.y2);
@@ -198,7 +187,7 @@ function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_siz
     const down = cell_to_devide.down;
     const left = cell_to_devide.left;
     const right = cell_to_devide.right;
-    const val = Math.floor(Math.sqrt(right.lenght()) / 2 / min_size) * min_size;
+    const val =  Math.floor(random_form_to(min_size, Math.sqrt(down.length()) - min_size) / min_size) * min_size;//Math.floor(Math.sqrt(down.lenght()) / 2 / min_size) * min_size;
     const new_up = new line(up.x1, up.y1, up.x2 - val, up.y2);
     const new_down = new line(down.x1, down.y1, down.x2 - val, down.y2);
     let new_right = new line(right.x1 - val, right.y1, right.x2 - val, right.y2);
@@ -206,10 +195,8 @@ function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_siz
     const other_up = new line(up.x2 - val, up.y1, up.x2, up.y2);
     const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
     const other_cell = new cell(other_up, other_down, right, new_right);
-    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_right.lenght()) - min_size)) / min_size) * min_size;
-    //doore_pos = Math.floor(test_doors_col(doore_pos, doors, new_right.y1, new_right.y2, new_right.x1, new_right.x2, min_size, true) / min_size) * min_size;
-    //val = Math.floor(test_doors_col(val, doors, new_right.y1, new_right.y2, new_right.x1, new_right.x2, min_size, true) / min_size) * min_size;
-    if (doore_pos >= Math.sqrt(new_right.lenght())) {
+    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_right.length()) - min_size)) / min_size) * min_size;
+    if (doore_pos >= Math.sqrt(new_right.length())) {
         return;
     }
     const t_part = new line(new_right.x1, new_right.y1, new_right.x2, new_right.y1 + doore_pos);
@@ -292,6 +279,22 @@ function draw_lines(lines, can) {
 
 }
 
+function on_mouse_move(event) {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    const x = event.clientX, y = event.clientY;
+
+    //ctx.lineWidth = 10;
+    draw_lines(walls, ctx);
+    ctx.lineWidth = thick;
+    const r = R;
+    Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
+    for (let i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
+        const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
+        obj.intersection(walls);
+        obj.draw(ctx);
+    }
+}
+
 var canvas = document.querySelector('canvas'); //temporary
 const ctx = canvas.getContext('2d');
 
@@ -315,18 +318,15 @@ if (random) {
 
 draw_lines(walls, ctx);
 
-document.body.addEventListener('mousemove', function (event) {
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    const x = event.clientX, y = event.clientY;
-    const center = new Point(x, y);
-    //ctx.lineWidth = 10;
-    draw_lines(walls, ctx);
-    ctx.lineWidth = thick;
-    const r = 100;
-    Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
-    for (var i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
-        const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
-        obj.intersection(walls);
-        obj.draw(ctx);
-    }
-}, false);
+let last_X = 0;
+let last_Y = 0;
+let R = 100;
+
+
+
+document.body.addEventListener('mousemove', on_mouse_move, false);
+
+window.addEventListener("wheel", event => {
+    R += event.deltaY / 25.0;
+    on_mouse_move(event);
+    });

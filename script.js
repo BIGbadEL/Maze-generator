@@ -64,11 +64,12 @@ class line {
         return new Point(Px, Py);
     }
 
-    intersection(others) {
+    intersection(others, degugDraw = false) {
         const x1 = this.x1;
         const x2 = this.x2;
         const y1 = this.y1;
         const y2 = this.y2;
+        let result = false;
         let last = new Point(x2, y2);
         for (let i = 0; i < others.length; i++) {
             const other = others[i];
@@ -82,6 +83,10 @@ class line {
                         if (temp > len(x1, y1, P.x, P.y)) {
                             last.x = P.x;
                             last.y = P.y;
+                            result = true;
+                            if(degugDraw){
+                                others[i].draw(ctx, "red");
+                            }
                         }
                     }
                 }
@@ -89,18 +94,17 @@ class line {
         }
         this.x2 = last.x;
         this.y2 = last.y;
+        return result;
     }
 
-    distance_to_point(point) {
-        const den = len(this.x1, this.y1, this.x2, this.y2);
-        if (den === 0) return;
-        const result = Math.abs((this.y2 - this.y1) * point.x - (this.x2 - this.x1) * point.y + this.x2 * this.y1 - this.y2 * this.x1);
-        return result / den;
+    contains_point(point){
+        return point.x >= this.x1 && point.x <= this.x2 && point.y >= this.y1 && point.y <= this.y2;
     }
+
 }
 
 function add_if(array, line) {
-    for (let i = 0; i < array.lenght; i++) {
+    for (let i = 0; i < array.length; i++) {
         if (array[i].equals(line)) {
             return;
         }
@@ -117,7 +121,7 @@ class cell {
     }
 
     size() {
-        return Math.sqrt(Math.min(this.up.lenght(), this.down.lenght(), this.left.lenght(), this.right.lenght()));
+        return Math.sqrt(Math.min(this.up.length(), this.down.length(), this.left.length(), this.right.length()));
     }
 
     width() {
@@ -136,6 +140,92 @@ class cell {
     }
 }
 
+class element {
+    constructor(point, size) {
+        this.start = point;
+        this.step = size;
+    }
+
+    goDown(maze) {
+        const x1 = this.start.x + this.step / 2;
+        const y1 = this.start.y + this.step / 2;
+        const x2 = x1;
+        const y2 = y1 + this.step;
+        const path = new line(x1, y1, x2, y2);
+        if (!path.intersection(maze)) {
+            return new element(new Point(this.start.x, this.start.y + this.step), this.step);
+        }
+    }
+
+    goRight(maze) {
+        const x1 = this.start.x + this.step / 2;
+        const y1 = this.start.y + this.step / 2;
+        const x2 = x1 + this.step;
+        const path = new line(x1, y1, x2, y1);
+        path.draw(ctx, "pink");
+        if (!path.intersection(maze)) {
+            return new element(new Point(this.start.x + this.step, this.start.y), this.step);
+        }
+    }
+
+    goLeft(maze) {
+        const x1 = this.start.x + this.step / 2;
+        const y1 = this.start.y + this.step / 2;
+        const x2 = x1 - this.step;
+        const path = new line(x2, y1, x1, y1);
+        if (!path.intersection(maze)) {
+            return new element(new Point(this.start.x - this.step, this.start.y), this.step);
+        }
+    }
+
+    goUp(maze) {
+        const x1 = this.start.x + this.step / 2;
+        const y1 = this.start.y + this.step / 2;
+        const x2 = x1;
+        const y2 = y1 - this.step;
+        const path = new line(x1, y1, x2, y2);
+        if (!path.intersection(maze)) {
+            return new element(new Point(this.start.x, this.start.y - this.step), this.step);
+        }
+    }
+
+    equals(other) {
+        return this.start.x === other.start.x && this.start.y === other.start.y;
+    }
+
+
+    draw() {
+        ctx.fillStyle = "red";
+        ctx.strokeStyle = "green";
+        ctx.fillRect(this.start.x, this.start.y, this.step, this.step);
+        ctx.beginPath();
+        ctx.rect(this.start.x, this.start.y, this.step, this.step);
+        ctx.stroke();
+    }
+}
+
+class grid {
+    constructor(size, height, width) {
+        this.elements = [];
+        this.size = size;
+        for(let i = 0; i < width; i += size) {
+            for(let j = 0; j < height; j += size) {
+                this.elements.push(new element(new Point(i, j), size));
+            }
+        }
+        this.elements.splice(0, 1);
+    }
+
+    contains_element(el) {
+        for(let i = 0; i < this.elements.length; i++){
+            if(this.elements[i].equals(el)){
+                this.elements.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+}
 
 function random_form_to(start, end) {
     return Math.random() * (end - start) + start;
@@ -150,7 +240,7 @@ function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_s
     if (size <= min_size) {
         return;
     }
-    const val = Math.floor(random_form_to(min_size, Math.sqrt(right.length()) - min_size) / min_size) * min_size;//Math.floor(random_form_to(min_size, Math.sqrt(down.lenght()) - min_size) / min_size) * min_size;
+    const val = Math.floor(random_form_to(min_size, Math.sqrt(right.length()) - min_size) / min_size) * min_size;//Math.floor(random_form_to(min_size, Math.sqrt(down.length()) - min_size) / min_size) * min_size;
     const new_right = new line(right.x1, right.y1, right.x2, right.y2 - val);
     const new_left = new line(left.x1, left.y1, left.x2, left.y2 - val);
     let new_down = new line(down.x1, down.y1 - val, down.x2, down.y2 - val);
@@ -187,7 +277,7 @@ function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_siz
     const down = cell_to_devide.down;
     const left = cell_to_devide.left;
     const right = cell_to_devide.right;
-    const val =  Math.floor(random_form_to(min_size, Math.sqrt(down.length()) - min_size) / min_size) * min_size;//Math.floor(Math.sqrt(down.lenght()) / 2 / min_size) * min_size;
+    const val =  Math.floor(random_form_to(min_size, Math.sqrt(down.length()) - min_size) / min_size) * min_size;//Math.floor(Math.sqrt(down.length()) / 2 / min_size) * min_size;
     const new_up = new line(up.x1, up.y1, up.x2 - val, up.y2);
     const new_down = new line(down.x1, down.y1, down.x2 - val, down.y2);
     let new_right = new line(right.x1 - val, right.y1, right.x2 - val, right.y2);
@@ -276,23 +366,94 @@ function draw_lines(lines, can) {
             lines[i].draw(can);
         }
     }
+}
 
+
+function solve_maze(path_to_fill, walls){
+    path_to_fill.forEach((elements, index) => {
+    //     const index = path_to_fill.length - 1;
+    //     const elements = path_to_fill[index];
+        const last_element = elements[elements.length - 1];
+        if(last_element.equals(finalElement) ){
+            path_to_fill.splice(0, index);
+            path_to_fill.splice(1, path_to_fill.length - 1);
+            on_mouse_move();
+            return;
+        }
+        const copy = [...elements];
+        let temp = last_element.goDown(walls);
+        let flag = false;
+        if (temp !== undefined) {
+            if (Grid.contains_element(temp)) {
+                elements.push(temp);
+                flag = true;
+            }
+        }
+        temp = last_element.goRight(walls);
+        if (temp !== undefined) {
+            if (Grid.contains_element(temp)) {
+                path_to_fill.push([...copy]);
+                path_to_fill[path_to_fill.length - 1].push(temp);
+                flag = true;
+            }
+        }
+        temp = last_element.goUp(walls);
+        if (temp !== undefined) {
+            if (Grid.contains_element(temp)) {
+                path_to_fill.push([...copy]);
+                path_to_fill[path_to_fill.length - 1].push(temp);
+                flag = true;
+            }
+        }
+        temp = last_element.goLeft(walls);
+        if (temp !== undefined) {
+            if (Grid.contains_element(temp)) {
+                path_to_fill.push([...copy]);
+                path_to_fill[path_to_fill.length - 1].push(temp);
+                flag = true;
+            }
+        }
+        if (!flag && path_to_fill.length > 1) {
+            path_to_fill.splice(index, 1);
+        }
+    });
+    on_mouse_move();
+}
+
+function draw_path(path_to_draw) {
+    path_to_draw.forEach(elements => elements.forEach(elem => {
+        elem.draw()
+    }));
 }
 
 function on_mouse_move(event) {
+    let x, y;
+    if(event === undefined){
+        x = last_X;
+        y = last_Y;
+    } else {
+        x = event.clientX;
+        y = event.clientY;
+    }
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    const x = event.clientX, y = event.clientY;
-
-    //ctx.lineWidth = 10;
     draw_lines(walls, ctx);
+    draw_path(paths);
     ctx.lineWidth = thick;
     const r = R;
+    const path = new line(last_X, last_Y, x, y);
+    if(path.intersection(walls, true)){
+        x = last_X;
+        y = last_Y;
+    }
     Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
     for (let i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
         const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
         obj.intersection(walls);
         obj.draw(ctx);
     }
+    last_X = x;
+    last_Y = y;
+
 }
 
 var canvas = document.querySelector('canvas'); //temporary
@@ -304,7 +465,11 @@ const thick = ctx.lineWidth;
 const wall = new line(100, 100, 200, 200);
 const height = window.innerHeight;
 const width = window.innerWidth;
+const size_of_cell = 20;
+const finalElement = new element(new Point(roundUp(window.innerWidth, size_of_cell) - size_of_cell, roundUp(window.innerHeight, size_of_cell) - size_of_cell), size_of_cell);
 let walls = [];// [new line(500, 550, 500, 600), wall]; //= [wall, wall1, wall3];
+const paths = [[new element(new Point(0, 0), size_of_cell)]];
+const Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
 const random = false;
 if (random) {
     for (let i = 0; i < height; i += 200) {
@@ -313,11 +478,12 @@ if (random) {
         }
     }
 } else {
-    rec_div_met(walls, window, 50, []);
+    rec_div_met(walls, window, size_of_cell, []);
 }
 
 draw_lines(walls, ctx);
-
+setInterval(solve_maze, 50, paths, walls);
+//solve_maze(paths, walls, size_of_cell);
 let last_X = 0;
 let last_Y = 0;
 let R = 100;

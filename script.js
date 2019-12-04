@@ -194,13 +194,19 @@ class element {
     }
 
 
-    draw() {
-        ctx.fillStyle = "red";
+    draw(col = "blue", padding = 2) {
+        ctx.fillStyle = col;
         ctx.strokeStyle = "green";
-        ctx.fillRect(this.start.x, this.start.y, this.step, this.step);
+        ctx.fillRect(this.start.x + padding, this.start.y + padding, this.step - 2 * padding, this.step - 2 * padding);
         ctx.beginPath();
-        ctx.rect(this.start.x, this.start.y, this.step, this.step);
+        ctx.rect(this.start.x + padding, this.start.y + padding, this.step - 2 * padding, this.step - 2 * padding);
         ctx.stroke();
+    }
+
+    hash() {
+        let hash = 100000 * this.start.x;
+        hash += this.start.y;
+        return hash;
     }
 }
 
@@ -213,6 +219,7 @@ class grid {
                 this.elements.push(new element(new Point(i, j), size));
             }
         }
+        console.log(this.elements.length);
         this.elements.splice(0, 1);
     }
 
@@ -369,6 +376,18 @@ function draw_lines(lines, can) {
 }
 
 
+function solve_helper(new_element, copy, path_to_fill){
+    if (new_element !== undefined) {
+        if (Grid.contains_element(new_element)) {
+            path_to_fill.push([...copy]);
+            path_to_fill[path_to_fill.length - 1].push(new_element);
+            set_of_elements_to_draw.add(new_element);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 function solve_maze(path_to_fill, walls){
     path_to_fill.forEach((elements, index) => {
     //     const index = path_to_fill.length - 1;
@@ -377,43 +396,29 @@ function solve_maze(path_to_fill, walls){
         if(last_element.equals(finalElement) ){
             path_to_fill.splice(0, index);
             path_to_fill.splice(1, path_to_fill.length - 1);
+            path_to_fill[0].forEach(elem => {
+                solution_path.add(elem);
+            });
             on_mouse_move();
             return;
         }
         const copy = [...elements];
         let temp = last_element.goDown(walls);
-        let flag = false;
+        let flag = 0;
         if (temp !== undefined) {
             if (Grid.contains_element(temp)) {
                 elements.push(temp);
-                flag = true;
+                set_of_elements_to_draw.add(temp);
+                flag += 1;
             }
         }
         temp = last_element.goRight(walls);
-        if (temp !== undefined) {
-            if (Grid.contains_element(temp)) {
-                path_to_fill.push([...copy]);
-                path_to_fill[path_to_fill.length - 1].push(temp);
-                flag = true;
-            }
-        }
+        flag += solve_helper(temp, copy, path_to_fill);
         temp = last_element.goUp(walls);
-        if (temp !== undefined) {
-            if (Grid.contains_element(temp)) {
-                path_to_fill.push([...copy]);
-                path_to_fill[path_to_fill.length - 1].push(temp);
-                flag = true;
-            }
-        }
+        flag += solve_helper(temp, copy, path_to_fill);
         temp = last_element.goLeft(walls);
-        if (temp !== undefined) {
-            if (Grid.contains_element(temp)) {
-                path_to_fill.push([...copy]);
-                path_to_fill[path_to_fill.length - 1].push(temp);
-                flag = true;
-            }
-        }
-        if (!flag && path_to_fill.length > 1) {
+        flag += solve_helper(temp, copy, path_to_fill);
+        if (flag === 0 && path_to_fill.length > 1) {
             path_to_fill.splice(index, 1);
         }
     });
@@ -421,9 +426,14 @@ function solve_maze(path_to_fill, walls){
 }
 
 function draw_path(path_to_draw) {
-    path_to_draw.forEach(elements => elements.forEach(elem => {
+
+    set_of_elements_to_draw.forEach(elem => {
         elem.draw()
-    }));
+    });
+
+    solution_path.forEach(elem => {
+        elem.draw("yellow");
+    });
 }
 
 function on_mouse_move(event) {
@@ -441,7 +451,7 @@ function on_mouse_move(event) {
     ctx.lineWidth = thick;
     const r = R;
     const path = new line(last_X, last_Y, x, y);
-    if(path.intersection(walls, true)){
+    if (path.intersection(walls, true)) {
         x = last_X;
         y = last_Y;
     }
@@ -469,7 +479,15 @@ const size_of_cell = 20;
 const finalElement = new element(new Point(roundUp(window.innerWidth, size_of_cell) - size_of_cell, roundUp(window.innerHeight, size_of_cell) - size_of_cell), size_of_cell);
 let walls = [];// [new line(500, 550, 500, 600), wall]; //= [wall, wall1, wall3];
 const paths = [[new element(new Point(0, 0), size_of_cell)]];
+const solution_path = new Set();
 const Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
+
+//drawing optimization
+
+const set_of_elements_to_draw = new Set();
+set_of_elements_to_draw.add(paths[0][0]);
+
+
 const random = false;
 if (random) {
     for (let i = 0; i < height; i += 200) {
@@ -482,8 +500,7 @@ if (random) {
 }
 
 draw_lines(walls, ctx);
-setInterval(solve_maze, 50, paths, walls);
-//solve_maze(paths, walls, size_of_cell);
+setInterval(solve_maze, 10, paths, walls);
 let last_X = 0;
 let last_Y = 0;
 let R = 100;

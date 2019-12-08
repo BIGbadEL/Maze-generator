@@ -320,10 +320,10 @@ function roundUp(val, to) {
     return Math.floor(val / to) * to;
 }
 
-function rec_div_met(walls_to_fill, cell_to_devide, min_size, doors) {
+function rec_div_met(walls_to_fill, cell_to_devide, min_size, doors, h = 0) {
     if (walls_to_fill.length === 0) {
-        const height = roundUp(window.innerHeight, min_size);//window.innerHeight;
-        const width = roundUp(window.innerWidth, min_size);//window.innerWidth;//
+        const height = roundUp(window.innerHeight - h, min_size);
+        const width = roundUp(window.innerWidth, min_size);
         const up = new line(0, 0, width, 0);
         const down = new line(0, height, width, height);
         const left = new line(0, 0, 0, height);
@@ -388,18 +388,19 @@ function solve_helper(new_element, copy, path_to_fill){
     return 0;
 }
 
-function solve_maze(path_to_fill, walls){
+function solve_maze(path_to_fill, walls, finale_element){
     path_to_fill.forEach((elements, index) => {
-    //     const index = path_to_fill.length - 1;
-    //     const elements = path_to_fill[index];
+        // const index = path_to_fill.length - 1;
+        // const elements = path_to_fill[index];
         const last_element = elements[elements.length - 1];
-        if(last_element.equals(finalElement) ){
+        if(last_element.equals(finale_element) ){
             path_to_fill.splice(0, index);
             path_to_fill.splice(1, path_to_fill.length - 1);
             path_to_fill[0].forEach(elem => {
                 solution_path.add(elem);
             });
             on_mouse_move();
+            clearInterval(solve_maze_intervale_id);
             return;
         }
         const copy = [...elements];
@@ -463,53 +464,68 @@ function on_mouse_move(event) {
     }
     last_X = x;
     last_Y = y;
-
 }
 
-var canvas = document.querySelector('canvas'); //temporary
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;//
-canvas.height = window.innerHeight;//window.innerHeight;
-const thick = ctx.lineWidth;
-const wall = new line(100, 100, 200, 200);
-const height = window.innerHeight;
-const width = window.innerWidth;
+let canvas;
+let ctx;
+let thick;
+let walls = [];
+let paths = [[]];
 const size_of_cell = 20;
-const finalElement = new element(new Point(roundUp(window.innerWidth, size_of_cell) - size_of_cell, roundUp(window.innerHeight, size_of_cell) - size_of_cell), size_of_cell);
-let walls = [];// [new line(500, 550, 500, 600), wall]; //= [wall, wall1, wall3];
-const paths = [[new element(new Point(0, 0), size_of_cell)]];
 const solution_path = new Set();
-const Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
-
-//drawing optimization
-
+let Grid;
 const set_of_elements_to_draw = new Set();
-set_of_elements_to_draw.add(paths[0][0]);
-
-
-const random = false;
-if (random) {
-    for (let i = 0; i < height; i += 200) {
-        for (let j = 0; j < width; j += 200) {
-            walls.push(new line(j, i, j + Math.random() * 100, i + Math.random() * 100));
-        }
-    }
-} else {
-    rec_div_met(walls, window, size_of_cell, []);
-}
-
-draw_lines(walls, ctx);
-setInterval(solve_maze, 10, paths, walls);
 let last_X = 0;
 let last_Y = 0;
 let R = 100;
+let finalElement;
+let solve_maze_intervale_id;
+
+function solve_handler() {
+    solve_maze_intervale_id = setInterval(solve_maze, 1, paths, walls, finalElement);
+}
+
+function clear_handler() {
+    clearInterval(solve_maze_intervale_id);
+    paths = [[new element(new Point(0, 0), size_of_cell)]];
+    solution_path.forEach(el => solution_path.delete(el));
+    set_of_elements_to_draw.forEach(el => set_of_elements_to_draw.delete(el));
+    Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
+    on_mouse_move();
+}
+
+function set_up(){
+    canvas = document.querySelector('canvas');
+    const ui = document.querySelector('#ui');
+    ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - ui.clientHeight;
+    const height = window.innerHeight - ui.clientHeight;
+    const width = window.innerWidth;
+    finalElement = new element(new Point(roundUp(window.innerWidth, size_of_cell) - size_of_cell, roundUp(window.innerHeight - ui.clientHeight, size_of_cell) - size_of_cell), size_of_cell);
+    paths = [[new element(new Point(0, 0), size_of_cell)]];
+    Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
+    set_of_elements_to_draw.add(paths[0][0]);
 
 
+    const random = false;
+    if (random) {
+        for (let i = 0; i < height; i += 200) {
+            for (let j = 0; j < width; j += 200) {
+                walls.push(new line(j, i, j + Math.random() * 100, i + Math.random() * 100));
+            }
+        }
+    } else {
+        rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
+    }
 
-document.body.addEventListener('mousemove', on_mouse_move, false);
+    draw_lines(walls, ctx);
 
-window.addEventListener("wheel", event => {
-    R += event.deltaY / 25.0;
-    on_mouse_move(event);
+    document.body.addEventListener('mousemove', on_mouse_move, false);
+
+    window.addEventListener("wheel", event => {
+        R += event.deltaY / 25.0;
+        on_mouse_move(event);
     });
+}

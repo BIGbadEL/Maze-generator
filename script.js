@@ -390,8 +390,8 @@ function solve_helper(new_element, copy, path_to_fill){
 
 function solve_maze(path_to_fill, walls, finale_element){
     path_to_fill.forEach((elements, index) => {
-        // const index = path_to_fill.length - 1;
-        // const elements = path_to_fill[index];
+        //const index = path_to_fill.length - 1;
+        //const elements = path_to_fill[index];
         const last_element = elements[elements.length - 1];
         if(last_element.equals(finale_element) ){
             path_to_fill.splice(0, index);
@@ -400,7 +400,7 @@ function solve_maze(path_to_fill, walls, finale_element){
                 solution_path.add(elem);
             });
             on_mouse_move();
-            clearInterval(solve_maze_intervale_id);
+            clearInterval(solve_maze_interval_id);
             return;
         }
         const copy = [...elements];
@@ -439,12 +439,13 @@ function draw_path(path_to_draw) {
 
 function on_mouse_move(event) {
     let x, y;
+    const ui = document.querySelector('#ui');
     if(event === undefined){
         x = last_X;
         y = last_Y;
     } else {
         x = event.clientX;
-        y = event.clientY;
+        y = event.clientY - ui.clientHeight;
     }
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     draw_lines(walls, ctx);
@@ -456,12 +457,15 @@ function on_mouse_move(event) {
         x = last_X;
         y = last_Y;
     }
-    Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
-    for (let i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
-        const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
-        obj.intersection(walls);
-        obj.draw(ctx);
+    if(draw_light){
+        Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
+        for (let i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
+            const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
+            obj.intersection(walls);
+            obj.draw(ctx);
+        }
     }
+
     last_X = x;
     last_Y = y;
 }
@@ -479,19 +483,32 @@ let last_X = 0;
 let last_Y = 0;
 let R = 100;
 let finalElement;
-let solve_maze_intervale_id;
+let solve_maze_interval_id;
+let draw_light = true;
 
 function solve_handler() {
-    solve_maze_intervale_id = setInterval(solve_maze, 1, paths, walls, finalElement);
+    solve_maze_interval_id = setInterval(solve_maze, 100, paths, walls, finalElement);
+}
+
+function light_handler() {
+    draw_light = !draw_light;
+    on_mouse_move();
 }
 
 function clear_handler() {
-    clearInterval(solve_maze_intervale_id);
+    clearInterval(solve_maze_interval_id);
     paths = [[new element(new Point(0, 0), size_of_cell)]];
     solution_path.forEach(el => solution_path.delete(el));
     set_of_elements_to_draw.forEach(el => set_of_elements_to_draw.delete(el));
     Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
     on_mouse_move();
+}
+
+function new_maze_handler() {
+    clear_handler();
+    const ui = document.querySelector('#ui');
+    walls = [];
+    rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
 }
 
 function set_up(){

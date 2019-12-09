@@ -485,9 +485,11 @@ let R = 100;
 let finalElement;
 let solve_maze_interval_id;
 let draw_light = true;
+let choose_start = false;
+let choose_final = false;
 
 function solve_handler() {
-    solve_maze_interval_id = setInterval(solve_maze, 100, paths, walls, finalElement);
+    solve_maze_interval_id = setInterval(solve_maze, 1, paths, walls, finalElement);
 }
 
 function light_handler() {

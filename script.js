@@ -219,7 +219,6 @@ class grid {
                 this.elements.push(new element(new Point(i, j), size));
             }
         }
-        console.log(this.elements.length);
         this.elements.splice(0, 1);
     }
 
@@ -437,6 +436,16 @@ function draw_path(path_to_draw) {
     });
 }
 
+function start_pos_handler() {
+    choose_start = true;
+    choose_final = false;
+}
+
+function final_pos_handler() {
+    choose_start = false;
+    choose_final = true;
+}
+
 function on_mouse_move(event) {
     let x, y;
     const ui = document.querySelector('#ui');
@@ -450,6 +459,8 @@ function on_mouse_move(event) {
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     draw_lines(walls, ctx);
     draw_path(paths);
+    finalElement.draw('green');
+    startElement.draw('red');
     ctx.lineWidth = thick;
     const r = R;
     const path = new line(last_X, last_Y, x, y);
@@ -470,6 +481,21 @@ function on_mouse_move(event) {
     last_Y = y;
 }
 
+function on_mouse_clicked(event) {
+    const ui = document.querySelector('#ui');
+    const x = event.clientX;
+    const y = event.clientY - ui.clientHeight;
+    if (choose_final) {
+        finalElement = new element(new Point(roundUp(x, size_of_cell), roundUp(y, size_of_cell)), size_of_cell);
+        clear_handler();
+        on_mouse_move();
+    } else if (choose_start) {
+        startElement = new element(new Point(roundUp(x, size_of_cell), roundUp(y, size_of_cell)), size_of_cell);
+        clear_handler();
+        on_mouse_move();
+    }
+}
+
 let canvas;
 let ctx;
 let thick;
@@ -483,6 +509,7 @@ let last_X = 0;
 let last_Y = 0;
 let R = 100;
 let finalElement;
+let startElement;
 let solve_maze_interval_id;
 let draw_light = true;
 let choose_start = false;
@@ -499,7 +526,7 @@ function light_handler() {
 
 function clear_handler() {
     clearInterval(solve_maze_interval_id);
-    paths = [[new element(new Point(0, 0), size_of_cell)]];
+    paths = [[startElement]];
     solution_path.forEach(el => solution_path.delete(el));
     set_of_elements_to_draw.forEach(el => set_of_elements_to_draw.delete(el));
     Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
@@ -523,7 +550,8 @@ function set_up(){
     const height = window.innerHeight - ui.clientHeight;
     const width = window.innerWidth;
     finalElement = new element(new Point(roundUp(window.innerWidth, size_of_cell) - size_of_cell, roundUp(window.innerHeight - ui.clientHeight, size_of_cell) - size_of_cell), size_of_cell);
-    paths = [[new element(new Point(0, 0), size_of_cell)]];
+    startElement = new element(new Point(0, 0), size_of_cell);
+    paths = [[startElement]];
     Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
     set_of_elements_to_draw.add(paths[0][0]);
 
@@ -542,7 +570,7 @@ function set_up(){
     draw_lines(walls, ctx);
 
     document.body.addEventListener('mousemove', on_mouse_move, false);
-
+    document.querySelector("#maze").addEventListener('mousedown', on_mouse_clicked);
     window.addEventListener("wheel", event => {
         R += event.deltaY / 25.0;
         on_mouse_move(event);

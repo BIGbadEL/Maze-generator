@@ -13,6 +13,9 @@
     <button onclick="light_handler()">light on/off</button>
     <button onclick="start_pos_handler()">choose start position</button>
     <button onclick="final_pos_handler()">choose final position</button>
+    <label>
+        <input id="size" type="range" value ="90" onmouseup="range_handler()" >
+    </label>
 </div>
 <div id="maze">
     <canvas style="background-color: black;"></canvas>

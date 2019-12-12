@@ -502,7 +502,7 @@ let ctx;
 let thick;
 let walls = [];
 let paths = [[]];
-const size_of_cell = 20;
+let size_of_cell = 20;
 const solution_path = new Set();
 let Grid;
 const set_of_elements_to_draw = new Set();
@@ -541,7 +541,16 @@ function new_maze_handler() {
     rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
 }
 
+function range_handler() {
+    const slider = document.querySelector("#size");
+    size_of_cell = parseInt(slider.value);
+    set_up();
+}
+
 function set_up(){
+    const slider = document.querySelector("#size");
+    slider.min = 20;
+    slider.max = 100;
     canvas = document.querySelector('canvas');
     const ui = document.querySelector('#ui');
     ctx = canvas.getContext('2d');
@@ -554,6 +563,8 @@ function set_up(){
     startElement = new element(new Point(0, 0), size_of_cell);
     paths = [[startElement]];
     Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell), startElement);
+    set_of_elements_to_draw.forEach(elem => set_of_elements_to_draw.delete(elem));
+    solution_path.forEach(elem => solution_path.delete(elem));
     set_of_elements_to_draw.add(paths[0][0]);
 
 
@@ -565,9 +576,10 @@ function set_up(){
             }
         }
     } else {
+        walls = [];
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
         rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
     }
-
     draw_lines(walls, ctx);
 
     document.body.addEventListener('mousemove', on_mouse_move, false);

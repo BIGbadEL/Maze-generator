@@ -211,15 +211,16 @@ class element {
 }
 
 class grid {
-    constructor(size, height, width) {
+    constructor(size, height, width, start_element) {
         this.elements = [];
         this.size = size;
         for(let i = 0; i < width; i += size) {
             for(let j = 0; j < height; j += size) {
-                this.elements.push(new element(new Point(i, j), size));
+                const temp  = new element(new Point(i, j), size);
+                if(!start_element.equals(temp))
+                    this.elements.push(temp);
             }
         }
-        this.elements.splice(0, 1);
     }
 
     contains_element(el) {
@@ -529,7 +530,7 @@ function clear_handler() {
     paths = [[startElement]];
     solution_path.forEach(el => solution_path.delete(el));
     set_of_elements_to_draw.forEach(el => set_of_elements_to_draw.delete(el));
-    Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
+    Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell), startElement);
     on_mouse_move();
 }
 
@@ -552,7 +553,7 @@ function set_up(){
     finalElement = new element(new Point(roundUp(window.innerWidth, size_of_cell) - size_of_cell, roundUp(window.innerHeight - ui.clientHeight, size_of_cell) - size_of_cell), size_of_cell);
     startElement = new element(new Point(0, 0), size_of_cell);
     paths = [[startElement]];
-    Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell));
+    Grid = new grid(size_of_cell, roundUp(window.innerHeight, size_of_cell), roundUp(window.innerWidth, size_of_cell), startElement);
     set_of_elements_to_draw.add(paths[0][0]);
 
 

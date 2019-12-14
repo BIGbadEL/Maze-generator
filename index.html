@@ -14,7 +14,8 @@
     <button onclick="start_pos_handler()">choose start position</button>
     <button onclick="final_pos_handler()">choose final position</button>
     <label>
-        <input id="size" type="range" value ="90" onmouseup="range_handler()" >
+        <p id="size"></p>
+        <input id="sizer" type="range" value ="90" onmouseup="range_handler()" oninput="change_handler()">
     </label>
 </div>
 <div id="maze">

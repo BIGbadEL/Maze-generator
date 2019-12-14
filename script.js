@@ -232,6 +232,16 @@ class grid {
         }
         return false;
     }
+
+    add_and_delete(to_add, to_delete) {
+        for(let i = 0; i < this.elements.length; i++){
+            if(this.elements[i].equals(to_delete)){
+                this.elements.splice(i, 1);
+                break;
+            }
+        }
+        this.elements.push(to_add);
+    }
 }
 
 function random_form_to(start, end) {
@@ -255,11 +265,11 @@ function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_s
     const other_right = new line(right.x1, right.y2 - val, right.x2, right.y2);
     const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
     const other_cell = new cell(new_down, down, other_right, other_left);
-    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_down.length()) - min_size)) / min_size) * min_size;
-    if (doore_pos >= Math.sqrt(new_down.length())) {
+    let door_pos = Math.floor((Math.random() * (Math.sqrt(new_down.length()) - min_size)) / min_size) * min_size;
+    if (door_pos >= Math.sqrt(new_down.length())) {
         return;
     }
-    const l_part = new line(new_down.x1, new_down.y1, new_down.x1 + doore_pos, new_down.y2);
+    const l_part = new line(new_down.x1, new_down.y1, new_down.x1 + door_pos, new_down.y2);
     if (l_part.x1 > l_part.x2) {
         return;
     }
@@ -292,11 +302,11 @@ function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_siz
     const other_up = new line(up.x2 - val, up.y1, up.x2, up.y2);
     const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
     const other_cell = new cell(other_up, other_down, right, new_right);
-    let doore_pos = Math.floor((Math.random() * (Math.sqrt(new_right.length()) - min_size)) / min_size) * min_size;
-    if (doore_pos >= Math.sqrt(new_right.length())) {
+    let door_pos = Math.floor((Math.random() * (Math.sqrt(new_right.length()) - min_size)) / min_size) * min_size;
+    if (door_pos >= Math.sqrt(new_right.length())) {
         return;
     }
-    const t_part = new line(new_right.x1, new_right.y1, new_right.x2, new_right.y1 + doore_pos);
+    const t_part = new line(new_right.x1, new_right.y1, new_right.x2, new_right.y1 + door_pos);
     if (t_part.y1 > t_part.y2) {
         return;
     }
@@ -375,6 +385,33 @@ function draw_lines(lines, can) {
     }
 }
 
+function move_handler_helper(new_element) {
+    if(new_element === undefined) return;
+    Grid.add_and_delete(new_element, startElement);
+    paths = [[new_element]];
+    set_of_elements_to_draw.add(startElement);
+    startElement = new_element;
+}
+
+function move_handler(event) {
+    const x = event.key;
+    switch(x) {
+        case "ArrowLeft":
+            move_handler_helper(startElement.goLeft(walls));
+            break;
+        case "ArrowRight":
+            move_handler_helper(startElement.goRight(walls));
+            break;
+        case "ArrowUp":
+            move_handler_helper(startElement.goUp(walls));
+            break;
+        case "ArrowDown":
+            move_handler_helper(startElement.goDown(walls));
+            break;
+    }
+    on_mouse_move();
+}
+
 
 function solve_helper(new_element, copy, path_to_fill){
     if (new_element !== undefined) {
@@ -390,8 +427,8 @@ function solve_helper(new_element, copy, path_to_fill){
 
 function solve_maze(path_to_fill, walls, finale_element){
     path_to_fill.forEach((elements, index) => {
-        //const index = path_to_fill.length - 1;
-        //const elements = path_to_fill[index];
+        // const index = path_to_fill.length - 1;
+        // const elements = path_to_fill[index];
         const last_element = elements[elements.length - 1];
         if(last_element.equals(finale_element) ){
             path_to_fill.splice(0, index);
@@ -512,12 +549,12 @@ let R = 100;
 let finalElement;
 let startElement;
 let solve_maze_interval_id;
-let draw_light = true;
+let draw_light = false;
 let choose_start = false;
 let choose_final = false;
 
 function solve_handler() {
-    solve_maze_interval_id = setInterval(solve_maze, 1, paths, walls, finalElement);
+    solve_maze_interval_id = setInterval(solve_maze, 10, paths, walls, finalElement);
 }
 
 function light_handler() {
@@ -542,13 +579,22 @@ function new_maze_handler() {
 }
 
 function range_handler() {
-    const slider = document.querySelector("#size");
+    const slider = document.querySelector("#sizer");
     size_of_cell = parseInt(slider.value);
     set_up();
 }
 
+function change_handler() {
+    const size_holder = document.querySelector("#size");
+    const slider = document.querySelector("#sizer");
+    size_holder.innerHTML = slider.value;
+}
+
 function set_up(){
-    const slider = document.querySelector("#size");
+    const slider = document.querySelector("#sizer");
+    const size_holder = document.querySelector("#size");
+    size_holder.innerHTML = size_of_cell;
+    slider.value = size_of_cell;
     slider.min = 20;
     slider.max = 100;
     canvas = document.querySelector('canvas');
@@ -566,6 +612,8 @@ function set_up(){
     set_of_elements_to_draw.forEach(elem => set_of_elements_to_draw.delete(elem));
     solution_path.forEach(elem => solution_path.delete(elem));
     set_of_elements_to_draw.add(paths[0][0]);
+    const kinput = document.querySelector('body');
+    kinput.onkeydown = move_handler;
 
 
     const random = false;
@@ -581,8 +629,8 @@ function set_up(){
         rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
     }
     draw_lines(walls, ctx);
-
-    document.body.addEventListener('mousemove', on_mouse_move, false);
+    on_mouse_move();
+    //document.body.addEventListener('mousemove', on_mouse_move, false);
     document.querySelector("#maze").addEventListener('mousedown', on_mouse_clicked);
     window.addEventListener("wheel", event => {
         R += event.deltaY / 25.0;

@@ -429,6 +429,7 @@ function solve_maze(path_to_fill, walls, finale_element){
     path_to_fill.forEach((elements, index) => {
         // const index = path_to_fill.length - 1;
         // const elements = path_to_fill[index];
+
         const last_element = elements[elements.length - 1];
         if(last_element.equals(finale_element) ){
             path_to_fill.splice(0, index);
@@ -487,7 +488,7 @@ function final_pos_handler() {
 function on_mouse_move(event) {
     let x, y;
     const ui = document.querySelector('#ui');
-    if(event === undefined){
+    if (event === undefined) {
         x = last_X;
         y = last_Y;
     } else {
@@ -501,12 +502,9 @@ function on_mouse_move(event) {
     startElement.draw('red');
     ctx.lineWidth = thick;
     const r = R;
-    const path = new line(last_X, last_Y, x, y);
-    if (path.intersection(walls, true)) {
-        x = last_X;
-        y = last_Y;
-    }
     if(draw_light){
+        x = startElement.start.x + size_of_cell / 2;
+        y = startElement.start.y + size_of_cell / 2;
         Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
         for (let i = 0; i < 2 * Math.PI; i += (Math.PI / 100)) {
             const obj = new line(x, y, x + r * Math.cos(i), y + r * Math.sin(i));
@@ -592,8 +590,14 @@ function change_handler() {
 
 function set_up(){
     const slider = document.querySelector("#sizer");
-    const size_holder = document.querySelector("#size");
-    size_holder.innerHTML = size_of_cell;
+    const sizer_div = document.querySelector("#sizer_div");
+    const buttons = document.querySelectorAll(".example_a");
+    let size_of_slider = 0;
+    buttons.forEach(button => size_of_slider += button.clientWidth);
+    console.log(size_of_slider);
+    sizer_div.clientWidth = size_of_slider;
+    slider.clientWidth = size_of_slider;
+
     slider.value = size_of_cell;
     slider.min = 20;
     slider.max = 100;

@@ -7,16 +7,20 @@
 </head>
 <body onload="set_up()">
 <div id="ui">
-    <button onclick="solve_handler()">solve</button>
-    <button onclick="clear_handler()">clear</button>
-    <button onclick="new_maze_handler()">new_maze</button>
-    <button onclick="light_handler()">light on/off</button>
-    <button onclick="start_pos_handler()">choose start position</button>
-    <button onclick="final_pos_handler()">choose final position</button>
-    <label>
-        <p id="size"></p>
-        <input id="sizer" type="range" value ="90" onmouseup="range_handler()" oninput="change_handler()">
-    </label>
+    <div class="button_cont" align="center">
+        <button class="example_a" onclick="solve_handler()">solve</button>
+        <button class="example_a" onclick="clear_handler()">clear</button>
+        <button class="example_a" onclick="new_maze_handler()">new maze</button>
+        <button class="example_a" onclick="light_handler()">light on/off</button>
+        <button class="example_a" onclick="start_pos_handler()">choose start position</button>
+        <button class="example_a" onclick="final_pos_handler()">choose final position</button>
+    </div>
+    <div id="sizer_div" align="center">
+        <label id="size">20</label>
+        <label id="sizer_label">
+            <input id="sizer" type="range" value ="90" onmouseup="range_handler()" oninput="change_handler()">
+        </label>
+    </div>
 </div>
 <div id="maze">
     <canvas style="background-color: black;"></canvas>

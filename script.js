@@ -592,12 +592,12 @@ function set_up(){
     const slider = document.querySelector("#sizer");
     const sizer_div = document.querySelector("#sizer_div");
     const buttons = document.querySelectorAll(".example_a");
+    const legend = document.querySelector("#legend");
     let size_of_slider = 0;
     buttons.forEach(button => size_of_slider += button.clientWidth);
-    console.log(size_of_slider);
     sizer_div.clientWidth = size_of_slider;
-    slider.clientWidth = size_of_slider;
-
+    slider.style.width = size_of_slider + "px";
+    legend.style.margin = "0px 0px 0px " + (window.innerWidth - size_of_slider) / 2 + "px";
     slider.value = size_of_cell;
     slider.min = 20;
     slider.max = 100;

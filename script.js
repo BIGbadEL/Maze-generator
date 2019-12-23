@@ -597,7 +597,22 @@ function set_up(){
     buttons.forEach(button => size_of_slider += button.clientWidth);
     sizer_div.clientWidth = size_of_slider;
     slider.style.width = size_of_slider + "px";
+    
+    let size_of_margin_in_legend = size_of_slider;
+    const red = document.querySelector("#red");
+    const green = document.querySelector("#green");
+    const blue = document.querySelector("#blue");
+    const black = document.querySelector("#black");
+    const yellow = document.querySelector("#yellow");
+    
+    const innerLegend = [red, green, blue, black, yellow];
+    innerLegend.forEach(el => size_of_margin_in_legend -= el.clientWidth);
+    console.log(size_of_margin_in_legend);
+    size_of_margin_in_legend = Math.floor(size_of_margin_in_legend / 10);
+    innerLegend.forEach(el => el.style.margin = "0px " + size_of_margin_in_legend + "px 0px " + size_of_margin_in_legend + "px");
     legend.style.margin = "0px 0px 0px " + (window.innerWidth - size_of_slider) / 2 + "px";
+
+
     slider.value = size_of_cell;
     slider.min = 20;
     slider.max = 100;

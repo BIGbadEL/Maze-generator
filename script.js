@@ -574,6 +574,7 @@ function new_maze_handler() {
     const ui = document.querySelector('#ui');
     walls = [];
     rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
+    on_mouse_move();
 }
 
 function range_handler() {
@@ -634,19 +635,9 @@ function set_up(){
     const kinput = document.querySelector('body');
     kinput.onkeydown = move_handler;
 
-
-    const random = false;
-    if (random) {
-        for (let i = 0; i < height; i += 200) {
-            for (let j = 0; j < width; j += 200) {
-                walls.push(new line(j, i, j + Math.random() * 100, i + Math.random() * 100));
-            }
-        }
-    } else {
-        walls = [];
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
-    }
+    walls = [];
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    rec_div_met(walls, window, size_of_cell, [], ui.clientHeight);
     draw_lines(walls, ctx);
     on_mouse_move();
     //document.body.addEventListener('mousemove', on_mouse_move, false);

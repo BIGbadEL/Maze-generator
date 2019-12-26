@@ -8,6 +8,8 @@
 <body onload="set_up()">
 <div id="ui">
     <div class="button_cont" align="center">
+        <a href="#popup1"><button class="example_a" >info</button></a>
+        
         <button class="example_a" onclick="solve_handler()">solve</button>
         <button class="example_a" onclick="clear_handler()">clear</button>
         <button class="example_a" onclick="new_maze_handler()">new maze</button>
@@ -39,7 +41,27 @@
         </div> 
         <div style="clear: both"> </div>
     </div>
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <h2>Breadth-first search</h2>
+            <a class="close" href="#">&times;</a>
+            <div class="content">
+                    BFS is an algorithm for traversing or searching tree or graph data structures. It starts at the tree root (or some arbitrary node of a graph, sometimes referred to as a 'search key'), and explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level.
+            </div>
+        </div>
+    </div>
+    <div id="popup2" class="overlay">
+            <div class="popup">
+                <h2>Breadth-first search</h2>
+                <a class="close" href="#">&times;</a>
+                <div class="content">
+                        BFS is an algorithm for traversing or searching tree or graph data structures. It starts at the tree root (or some arbitrary node of a graph, sometimes referred to as a 'search key'), and explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level.
+                </div>
+            </div>
+        </div> 
 </div>
+
+
 <div id="maze">
     <canvas style="background-color: black;"></canvas>
 </div>

@@ -8,14 +8,14 @@
 <body onload="set_up()">
 <div id="ui">
     <div class="button_cont" align="center">
-        <a href="#popup1"><button class="example_a" >info</button></a>
+        <a href="#popup1"><button class="example_a" >tutorial</button></a>
         
-        <button class="example_a" onclick="solve_handler()">solve</button>
-        <button class="example_a" onclick="clear_handler()">clear</button>
-        <button class="example_a" onclick="new_maze_handler()">new maze</button>
-        <button class="example_a" onclick="light_handler()">light on/off</button>
-        <button class="example_a" onclick="start_pos_handler()">choose start position</button>
-        <button class="example_a" onclick="final_pos_handler()">choose final position</button>
+        <button class="example_a" onclick="solve_handler()">wizualizacja</button>
+        <button class="example_a" onclick="clear_handler()">wyczyść</button>
+        <button class="example_a" onclick="new_maze_handler()">nowy labirynt</button>
+        <button class="example_a" onclick="light_handler()">symulacja światła on/off</button>
+        <button class="example_a" onclick="start_pos_handler()">wybierz pozycje startową</button>
+        <button class="example_a" onclick="final_pos_handler()">wybierz pozycje końcową</button>
     </div>
     <div id="sizer_div" align="center">
         <label id="size">20</label>
@@ -25,40 +25,88 @@
     </div>
     <div id="legend" align="center">
         <div id="red">
-            start position
+            pozycja startowa
         </div> 
         <div id="green">
-            final position
+            pozycja końcowa
         </div> 
         <div id="blue">
-            visited node
+            odwiedzone węzły
         </div> 
         <div id="black">
-            not visited node
+            nieodwiedzone węzły
         </div> 
         <div id="yellow">
-            path node
+            znaleziona scieżka
         </div> 
         <div style="clear: both"> </div>
     </div>
     <div id="popup1" class="overlay">
+            <div class="popup">
+                <h2>Proejkt Techniki Internetowe 2019/2020 <br/> Grzegorz Litarowicz</h2>
+                <a class="close" href="#">&times;</a>
+                <div class="content">
+                    Celem tego projektu jest przedstawienie wizualicacji działania algorytmu Breadth-first search, na podstawie losowo generowanego labiryntu, stworzonego przy pomocy metody rekurencyjnego podziału.
+                    <a href="#popup2"><button class="next_button" >next</button></a>
+                </div>
+            </div>
+        </div>
+    <div id="popup2" class="overlay">
+        <div class="popup">
+            <h2>Recursive division method</h2>
+            <a class="close" href="#">&times;</a>
+            <div class="content">
+                    Metoda podziału rekurencyjnego - jest to algorytm wykorzystywany do generoawnia losowego labiryntu. <br/>
+                    Działanie: <br/>
+                    1. Rozpoczynamy tylko z 4 ścianami ograniczającmi, powstaje nam w ten sposób jedna komnata,<br/>
+                    2. Dzielimy komnatę w losowym miejscu, wstawiając ścianę<br/>
+                    3. Na ścianie wstawiamy w losowym miejscu drzwi <br/>
+                    4. Otrzymaliśmy dwie komnaty, więc rekursywnie powtarzamy proces.<br/>
+                    <a href="#popup3"><button class="next_button" >next</button></a>
+            </div>
+        </div>
+    </div>
+    <div id="popup3" class="overlay">
         <div class="popup">
             <h2>Breadth-first search</h2>
             <a class="close" href="#">&times;</a>
             <div class="content">
-                    BFS is an algorithm for traversing or searching tree or graph data structures. It starts at the tree root (or some arbitrary node of a graph, sometimes referred to as a 'search key'), and explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level.
+                    BFS to algorytm stworzony do przeszukiwania struktur grafowych. Rozpoczynamy na dowolnym, arbitralnie wybranym węźle, oraz przeszukujemy WSZYSTKICH jego sąsiadów zanim przeniesiemy poszukiwania na następny poziom. Jest to główna różniza w stosunku do algorytmu Depth-first search, który najpierw przeszukuje bardziej odległe węzły zanim przensiesie się na sąsiadów.
+                    <a href="#popup4"><button class="next_button" >next</button></a>
             </div>
         </div>
     </div>
-    <div id="popup2" class="overlay">
-            <div class="popup">
-                <h2>Breadth-first search</h2>
-                <a class="close" href="#">&times;</a>
-                <div class="content">
-                        BFS is an algorithm for traversing or searching tree or graph data structures. It starts at the tree root (or some arbitrary node of a graph, sometimes referred to as a 'search key'), and explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level.
-                </div>
+    <div id="popup4" class="overlay">
+        <div class="popup">
+            <h2>Dodatkowe funkcje</h2>
+            <a class="close" href="#">&times;</a>
+            <div class="content">
+                    Przy pomocy strzałek, można samemu spróbować rozwiązać labirynt. <br/>
+                    Symulacja światła - symuluje promienie rozchodzące się z pozycji gracza (aktualnej pozycji startowej) <br/>
+                    Wybrór pozycji startowej - pozwala na przeniesienie miejsca gdzie algorytm rozpoczyna poszukiwania <br/>
+                    Wybór pozycji końcowej - pozwala na zmiane miejsca, którego algorym poszukuje.
+                    <a href="#popup5"><button class="next_button" >next</button></a>
             </div>
-        </div> 
+        </div>
+    </div>
+    <div id="popup5" class="overlay">
+        <div class="popup">
+            <h2>Funkcje przycisków</h2>
+            <a class="close" href="#">&times;</a>
+            <div class="content">
+                    Turorial - powoduje ponowne uruchomienie tego tutorialu <br/>
+                    Wizualizacja - powoduje rozwiązanie aktualnie wygenerowanego labiruntu <br/>
+                    Wyczyść - przywraca pierwotny stan labiryntu <br/>
+                    Nowy labirynt - powoduje wygenerowanie nowego labiryntu <br/>
+                    Symulacja światła on/off - włącza i wyłącza symulacje świtała <br/>
+                    Wybierz pozycje startową - włącza tryb wyboru pozycji startowej. Podczas tego trybu kliknięcie w plansze spowoduje zmianę pozycji startowej. <br/>
+                    Wybierz pozycje końcową - włącza tryb wyboru pozycji końcowej. Podczas tego trybu kliknięcie w plansze spowoduje zmianę pozycji końcowej. <br/>
+                    Suwak pozwalający na zmianę rozmiaru labirytnu <br/>
+                    Legenda - tłumacząca funkcje kolorów na planszy z labiryntem.
+                    
+            </div>
+        </div>
+    </div>
 </div>
 
 

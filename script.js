@@ -302,7 +302,7 @@ function add_random_vertical_wall_to_maze(walls_to_fill, cell_to_devide, min_siz
     const other_up = new line(up.x2 - val, up.y1, up.x2, up.y2);
     const other_down = new line(down.x2 - val, down.y1, down.x2, down.y2);
     const other_cell = new cell(other_up, other_down, right, new_right);
-    let door_pos = Math.floor((Math.random() * (Math.sqrt(new_right.length()) - min_size)) / min_size) * min_size;
+    let door_pos = Math.floor((Math.random() * (Math.sqrt(new_right.length()))) / min_size) * min_size;
     if (door_pos >= Math.sqrt(new_right.length())) {
         return;
     }

@@ -135,6 +135,23 @@ h1 {
     visibility: visible;
     opacity: 1;
   }
+
+  .overlay2 {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .overlay2:target {
+    visibility: hidden;
+    opacity: 0;
+  }
   
   .popup {
     margin: 70px auto;
@@ -177,3 +194,18 @@ h1 {
       width: 70%;
     }
   }
+
+  .next_button {
+    color: #fff !important;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: #3088ed;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    float: right;
+}
+
+.next_button:hover {
+    background: #4199fe;
+}

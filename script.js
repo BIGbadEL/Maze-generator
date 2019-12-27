@@ -265,7 +265,7 @@ function add_random_horizontal_wall_to_maze(walls_to_fill, cell_to_devide, min_s
     const other_right = new line(right.x1, right.y2 - val, right.x2, right.y2);
     const other_left = new line(left.x1, left.y2 - val, left.x2, left.y2);
     const other_cell = new cell(new_down, down, other_right, other_left);
-    let door_pos = Math.floor((Math.random() * (Math.sqrt(new_down.length()) - min_size)) / min_size) * min_size;
+    let door_pos = Math.floor((Math.random() * (Math.sqrt(new_down.length()))) / min_size) * min_size;
     if (door_pos >= Math.sqrt(new_down.length())) {
         return;
     }
@@ -413,11 +413,11 @@ function move_handler(event) {
 }
 
 
-function solve_helper(new_element, copy, path_to_fill){
+function solve_helper(new_element, copy, new_paths){
     if (new_element !== undefined) {
         if (Grid.contains_element(new_element)) {
-            path_to_fill.push([...copy]);
-            path_to_fill[path_to_fill.length - 1].push(new_element);
+            new_paths.push([...copy]);
+            new_paths[new_paths.length - 1].push(new_element);
             set_of_elements_to_draw.add(new_element);
             return 1;
         }
@@ -426,6 +426,7 @@ function solve_helper(new_element, copy, path_to_fill){
 }
 
 function solve_maze(path_to_fill, walls, finale_element){
+    new_paths = [];
     path_to_fill.forEach((elements, index) => {
         // const index = path_to_fill.length - 1;
         // const elements = path_to_fill[index];
@@ -452,15 +453,16 @@ function solve_maze(path_to_fill, walls, finale_element){
             }
         }
         temp = last_element.goRight(walls);
-        flag += solve_helper(temp, copy, path_to_fill);
+        flag += solve_helper(temp, copy, new_paths);
         temp = last_element.goUp(walls);
-        flag += solve_helper(temp, copy, path_to_fill);
+        flag += solve_helper(temp, copy, new_paths);
         temp = last_element.goLeft(walls);
-        flag += solve_helper(temp, copy, path_to_fill);
+        flag += solve_helper(temp, copy, new_paths);
         if (flag === 0 && path_to_fill.length > 1) {
             path_to_fill.splice(index, 1);
         }
     });
+    new_paths.forEach(path => path_to_fill.push(path));
     on_mouse_move();
 }
 
@@ -552,7 +554,7 @@ let choose_start = false;
 let choose_final = false;
 
 function solve_handler() {
-    solve_maze_interval_id = setInterval(solve_maze, 10, paths, walls, finalElement);
+    solve_maze_interval_id = setInterval(solve_maze, 100, paths, walls, finalElement);
 }
 
 function light_handler() {
